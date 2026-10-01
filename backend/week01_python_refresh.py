@@ -68,3 +68,57 @@ def search_courses(keyword):
     return results
 
 print(search_courses("web"))
+
+def find_student(student_id):
+    for student in students:
+        if student["id"] == student_id:
+            return student
+    return None
+
+def find_course(course_code):
+    for course in courses:
+        if course["code"] == course_code:
+            return course
+    return None
+
+def enroll_student(student_id, course_code):
+    if not find_student(student_id):
+        return False, f"Sinh vien '{student_id}' khong ton tai."
+
+    course = find_course(course_code)
+    if not course:
+        return False, f"Hoc phan '{course_code}' khong ton tai."
+
+    is_duplicated = any(
+        item["student_id"] == student_id and item["course_code"] == course_code
+        for item in enrollments
+    )
+
+    if is_duplicated:
+        return False, f"Sinh vien '{student_id}' da dang ky hoc phan '{course_code}'."
+
+    if course["enrolled"] >= course["capacity"]:
+        return False, f"Hoc phan '{course_code}' da het cho"
+
+    enrollments.append({"student_id": student_id, "course_code": course_code})
+    course["enrolled"] += 1
+
+    return True, f"Sinh vien '{student_id}' da dang ky hoc phan '{course_code}' thanh cong"
+
+print("\nTest 5 tinh huong dang ky hoc phan:")
+
+test_cases = [
+    ("22000002", "INT2204", "1. Đăng ký thành công (Còn chỗ, SV & HP tồn tại)"),
+    ("22000001", "INT2204", "2. Đăng ký trùng (22000001 đã đăng ký INT2204)"),
+    ("22000002", "INT2205", "3. Lớp đầy (INT2205 có capacity=2, enrolled=2)"),
+    ("22000002", "INT9999", "4. Mã học phần không tồn tại"),
+    ("99999999", "INT2204", "5. Mã sinh viên không tồn tại"),
+]
+
+for idx, (s_id, c_code, desc) in enumerate(test_cases, 1):
+    success, message = enroll_student(s_id, c_code)
+    print(f"\n[{desc}]")
+    print(f"  Input : student_id='{s_id}', course_code='{c_code}'")
+    print(f"  Output: {message}")
+
+#Test case tren duoc tao boi cong cu Gemini AI de ho tro kiem tra tinh dung sai cua ham
